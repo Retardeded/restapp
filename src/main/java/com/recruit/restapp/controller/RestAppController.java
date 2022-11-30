@@ -25,7 +25,7 @@ public class RestAppController {
         return "pong";
     }
 
-    @GetMapping("/numbers/sort-command")
+    @PostMapping("/numbers/sort-command")
     public List<Integer> sortNumbers(@RequestBody NumbersSortData numbersSortData) {
         if(numbersSortData.getNumbers() == null) {
             throw new ResponseStatusException(UNPROCESSABLE_ENTITY, "Invalid data");
