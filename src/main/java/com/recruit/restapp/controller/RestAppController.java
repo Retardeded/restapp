@@ -1,6 +1,7 @@
 package com.recruit.restapp.controller;
 
-import com.recruit.restapp.model.NumbersSortData;
+import com.recruit.restapp.model.CurrencyRequest;
+import com.recruit.restapp.model.CurrencyRequestLog;
 import com.recruit.restapp.service.RestAppService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,21 +21,13 @@ public class RestAppController {
         this.restAppService = restAppService;
     }
 
-    @GetMapping("/status/ping")
-    public String getPing() {
-        return "pong";
+    @PostMapping("/currencies/get-current-currency-value-command")
+    public Double getCurrencyValue(@RequestBody CurrencyRequest currencyRequest) {
+        return restAppService.getCurrency(currencyRequest);
     }
 
-    @PostMapping("/numbers/sort-command")
-    public List<Integer> sortNumbers(@RequestBody NumbersSortData numbersSortData) {
-        if(numbersSortData.getNumbers() == null) {
-            throw new ResponseStatusException(UNPROCESSABLE_ENTITY, "Invalid data");
-        }
-        return restAppService.sortNumbers(numbersSortData);
-    }
-
-    @GetMapping("/currencies/get-current-currency-value-command")
-    public Double getCurrencyValue(@RequestBody String currency) {
-        return restAppService.getCurrency(currency);
+    @GetMapping(path = "/currencies/requests")
+    public List<CurrencyRequestLog> getAllCurrencyRequests() {
+        return restAppService.getAllCurrencyRequests();
     }
 }

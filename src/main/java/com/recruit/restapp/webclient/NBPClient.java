@@ -32,6 +32,7 @@ public class NBPClient {
                             });
             CurrencyTableDto table = rateResponse.getBody();
 
+            assert table != null;
             return table.rates.get(0).mid;
         } catch (HttpStatusCodeException e) {
             throw new ResponseStatusException(NOT_FOUND, "Such currency code does not exist");

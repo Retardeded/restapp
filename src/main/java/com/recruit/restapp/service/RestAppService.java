@@ -1,39 +1,40 @@
 package com.recruit.restapp.service;
 
-import com.recruit.restapp.model.NumbersSortData;
+import com.recruit.restapp.model.CurrencyRequest;
+import com.recruit.restapp.model.CurrencyRequestLog;
+import com.recruit.restapp.repository.CurrencyRequestLogRepository;
 import com.recruit.restapp.webclient.NBPClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
-
-import static org.springframework.http.HttpStatus.*;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RestAppService {
 
     private final NBPClient nbpClient;
+    private final CurrencyRequestLogRepository currencyRequestLogRepository;
 
-    public RestAppService(NBPClient nbpClient) {
+    public RestAppService(NBPClient nbpClient, CurrencyRequestLogRepository currencyRequestLogRepository) {
         this.nbpClient = nbpClient;
+        this.currencyRequestLogRepository = currencyRequestLogRepository;
     }
 
-    public List<Integer> sortNumbers(NumbersSortData numbersSortData) {
-            if (Objects.equals(numbersSortData.getOrder(), "ASC")) {
-                Collections.sort(numbersSortData.getNumbers());
-                return numbersSortData.getNumbers();
-            } else if (Objects.equals(numbersSortData.getOrder(), "DESC")) {
-                Collections.sort(numbersSortData.getNumbers());
-                Collections.reverse(numbersSortData.getNumbers());
-                return numbersSortData.getNumbers();
-            }
-            else {
-                throw new ResponseStatusException(UNPROCESSABLE_ENTITY, "Invalid data");
-            }
+    public Double getCurrency(CurrencyRequest currencyRequest) {
+    String currencyCode = currencyRequest.getCurrency();
+    Double currencyValue = nbpClient.getCurrencyValue(currencyCode);
+
+    saveCurrencyRequestLog(currencyRequest, currencyCode, currencyValue);
+        return currencyValue;
     }
 
-    public Double getCurrency(String currency) {
-        return nbpClient.getCurrencyValue(currency);
+    private void saveCurrencyRequestLog(CurrencyRequest currencyRequest, String currencyCode, Double currencyValue) {
+        CurrencyRequestLog requestLog = new CurrencyRequestLog(currencyCode, currencyRequest.getName(), LocalDateTime.now(), currencyValue.doubleValue());
+        currencyRequestLogRepository.save(requestLog);
+    }
+
+    public List<CurrencyRequestLog> getAllCurrencyRequests() {
+        return (List<CurrencyRequestLog>) currencyRequestLogRepository.findAll();
     }
 }
